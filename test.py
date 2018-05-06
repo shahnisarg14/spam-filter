@@ -1,6 +1,6 @@
 import os
 import string
-from train import p_spam, p_ham
+from train import p_spam, p_ham, train_positive, train_negative, positive_total, negative_total
 
 
 def predict(path):
@@ -21,8 +21,8 @@ def pre_process(line):
 
 
 def classify(content, label):
-    is_spam = p_spam * conditional_message(content, True)
-    is_ham = p_ham * conditional_message(content, False)
+    is_spam = p_spam * conditional_message(content, label)
+    is_ham = p_ham * conditional_message(content, label)
     if is_spam > is_ham:
         return True
     else:
@@ -30,7 +30,18 @@ def classify(content, label):
 
 
 def conditional_message(content, label):
-    return 1
+    result = 1.0
+    tokens = content.split(" ")
+    for word in tokens:
+        result *= conditional(word, label)
+    return result
+
+
+def conditional(word, label):
+    if label == "spam":
+        return (train_positive.get(word, 1))/float(positive_total + len(train_positive) + len(train_negative))
+    else:
+        return (train_negative.get(word, 1))/float(negative_total + len(train_positive) + len(train_negative))
 
 path = os.getcwd() + os.path.sep + "resources" + os.path.sep + "english.txt"
 predict(path)
