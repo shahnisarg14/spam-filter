@@ -10,7 +10,7 @@ def get_count(path):
             line = pre_process(line)
             label = line.rsplit(" ", 1)[1]
             content = line.rsplit(' ', 1)[0]
-            process(content)
+            process(content, label)
             total_count += 1
             if label == "spam":
                 s_count += 1
@@ -22,16 +22,24 @@ def pre_process(line):
         line = line.replace(c, " ")
         line = ''.join([i if ord(i) < 123 else '' for i in line])
     line = line.replace("\n", "")
-    print line
     return line
 
 
-def process(content):
-    print content # Process the content here
+def process(content, label):
+    global positive_total, negative_total
+    for word in content:
+        if label == "spam":
+            train_positive[word] = train_positive.get(word, 0) + 1
+            positive_total += 1
+        else:
+            train_negative[word] = train_negative.get(word, 0) + 1
+            negative_total += 1
 
+train_positive = {}
+train_negative = {}
+positive_total = 0
+negative_total = 0
 path = os.getcwd() + os.path.sep + "resources" + os.path.sep + "english_big.txt"
 spam_count, ham_count = get_count(path)
 p_spam = spam_count/float(spam_count + ham_count)
 p_ham = ham_count/float(spam_count + ham_count)
-
-print p_spam, p_ham
